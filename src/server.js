@@ -23,7 +23,10 @@ app.use(rateLimiter);
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin:
+    process.env.NODE_ENV === "production"
+      ? [process.env.FRONTEND_URL, "https://your-domain.vercel.app"]
+      : true, // Allow all origins in development
   credentials: true,
   optionsSuccessStatus: 200,
 };
@@ -90,7 +93,7 @@ process.on("SIGINT", () => {
 });
 
 // Deployment trigger
-const server = app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(
     `Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`,
   );
