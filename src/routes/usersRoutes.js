@@ -6,10 +6,9 @@ import {
   signin,
   getUserAddresses,
 } from "../controllers/userController.js";
-import { verifyToken } from "../../middleware/auth.js";
 
 router.post("/signup", signup);
 router.post("/signin", signin);
-router.get("/addresses", verifyToken, getUserAddresses);
+router.get("/addresses", getUserAddresses);
 
 export default router;

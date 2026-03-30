@@ -6,17 +6,16 @@ import {
   getAllOrders,
   updateOrderStatus,
 } from "../controllers/orderController.js";
-import { verifyToken } from "../../middleware/auth.js";
-import { isAdmin } from "../../middleware/adminAuth.js";
+
 const router = express.Router();
 
 // User routes
-router.post("/", verifyToken, createOrder);
-router.get("/", verifyToken, getUserOrders);
-router.get("/:id", verifyToken, getOrderDetails);
+router.post("/", createOrder);
+router.get("/", getUserOrders);
+router.get("/:id", getOrderDetails);
 
 // Admin routes
-router.get("/admin/all", verifyToken, isAdmin, getAllOrders);
-router.put("/admin/:id/status", verifyToken, isAdmin, updateOrderStatus);
+router.get("/admin/all", getAllOrders);
+router.put("/admin/:id/status", updateOrderStatus);
 
 export default router;
