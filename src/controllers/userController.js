@@ -2,11 +2,29 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+// GET HASHED PASSWORD: for MongoDB Atlas admin creation
+export const getHashedPassword = async (req, res) => {
+  try {
+    const password = "password";
+    const hashedPassword = await bcrypt.hash(password, 10);
+    res.status(200).json({
+      message: "Hashed password for 'password'",
+      hashedPassword: hashedPassword,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error generating hash: " + error.message });
+  }
+};
+
 // CREATE ADMIN: create admin user (temporary for testing)
 export const createAdmin = async (req, res) => {
-  const { name, email, password } = req.body;
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: "All fields required" });
+  const { name, email } = req.body;
+  const password = "password"; // Hardcoded password
+
+  if (!name || !email) {
+    return res.status(400).json({ message: "Name and email required" });
   }
   try {
     //check if the user is existed
