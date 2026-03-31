@@ -40,7 +40,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // Static files
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
 // Request logging (only in development)
 if (process.env.NODE_ENV !== "production") {
