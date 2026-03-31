@@ -25,7 +25,11 @@ app.use(rateLimiter);
 const corsOptions = {
   origin:
     process.env.NODE_ENV === "production"
-      ? [process.env.FRONTEND_URL, "https://your-domain.vercel.app"]
+      ? [
+          process.env.FRONTEND_URL,
+          "https://your-domain.vercel.app",
+          "https://e-commerce-almaalem-frontend-o2i9.vercel.app",
+        ]
       : true, // Allow all origins in development
   credentials: true,
   optionsSuccessStatus: 200,
