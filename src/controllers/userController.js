@@ -4,11 +4,10 @@ import jwt from "jsonwebtoken";
 
 // CREATE ADMIN: create admin user (temporary for testing)
 export const createAdmin = async (req, res) => {
-  const { name, email } = req.body;
-  const password = "password"; // Hardcoded password
+  const { name, email, password } = req.body;
 
-  if (!name || !email) {
-    return res.status(400).json({ message: "Name and email required" });
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: "All fields required" });
   }
   try {
     //check if the user is existed
