@@ -23,14 +23,28 @@ app.use(rateLimiter);
 
 // CORS configuration
 const corsOptions = {
-  origin:
-    process.env.NODE_ENV === "production"
-      ? [
-          process.env.FRONTEND_URL,
-          "https://your-domain.vercel.app",
-          "https://e-commerce-almaalem-frontend-o2i9.vercel.app",
-        ]
-      : true, // Allow all origins in development
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // In production, allow specific origins
+    if (process.env.NODE_ENV === "production") {
+      const allowedOrigins = [
+        process.env.FRONTEND_URL,
+        "https://your-domain.vercel.app",
+        "https://e-commerce-almaalem-frontend-o2i9.vercel.app",
+      ].filter(Boolean);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    } else {
+      // In development, allow all origins
+      callback(null, true);
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200,
 };
