@@ -21,13 +21,15 @@ const PORT = process.env.PORT || 5001;
 // Security middleware
 app.use(rateLimiter);
 
-// CORS configuration
-const corsOptions = {
-  origin: true, // Allow all origins temporarily for testing
-  credentials: true,
-  optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
+// CORS configuration - completely permissive for testing
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 
 mongodbConn();
 
