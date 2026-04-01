@@ -5,54 +5,25 @@ import User from "../models/User.js";
 export const createOrder = async (req, res) => {
   try {
     const userId = req.userId;
-    const { shippingAddress } = req.body;
+    const { shippingAddress, items } = req.body;
     console.log("shippingAddress", shippingAddress);
-    console.log("shippingAddress", shippingAddress.saveAddress);
+    console.log("items", items);
 
-    // 1. If 'saveAddress' is true, push it to the User's array if it doesn't exist
-    if (shippingAddress.saveAddress) {
-      await User.findByIdAndUpdate(userId, {
-        $addToSet: { addresses: shippingAddress }, // $addToSet prevents exact duplicates
-      });
-    }
-
-    const cart = await Cart.findOne({ userId }).populate("items.product");
-
-    if (!cart || cart.items.length === 0) {
-      return res.status(404).json({ message: "Cart not found or empty" });
-    }
-
-    let totalAmount = 0;
-    const orderItems = [];
-
-    for (const item of cart.items) {
-      // SAFETY CHECK: Ensure the product actually exists after populate
-      if (!item.product) {
-        continue; // Or return an error: "One of the items in your cart is no longer available"
-      }
-
-      const price = item.product.price;
-      totalAmount += price * item.quantity;
-
-      orderItems.push({
-        productId: item.product._id,
+    // Handle both cases: with items (guest checkout) and without items (user logged in)
+    if (items && items.length > 0) {
+      // Guest checkout with items
+      let totalAmount = 0;
+      const orderItems = items.map((item) => ({
+        productId: item._id,
         quantity: item.quantity,
-        priceAtPurchase: price,
-      });
-    }
+        priceAtPurchase: item.price,
+      }));
 
-    // Double check if we still have items after the safety check
-    if (orderItems.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "No valid products found in cart" });
-    }
-
-    const newOrder = new Order({
-      userId,
-      items: orderItems,
-      totalAmount,
-      shippingAddress,
+      const order = new Order({
+        userId,
+        items: orderItems,
+        shippingAddress,
+        totalAmount: orderItems.reduce((sum, item) => sum + item.priceAtPurchase * item.quantity, 0),
       status: "Pending",
     });
 
