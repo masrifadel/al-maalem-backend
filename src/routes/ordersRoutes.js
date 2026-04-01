@@ -1,4 +1,5 @@
 import express from "express";
+import { verifyToken } from "../../middleware/auth.js";
 import {
   createOrder,
   getOrderDetails,
@@ -10,12 +11,12 @@ import {
 const router = express.Router();
 
 // User routes
-router.post("/", createOrder);
-router.get("/", getUserOrders);
-router.get("/:id", getOrderDetails);
+router.post("/", verifyToken, createOrder);
+router.get("/", verifyToken, getUserOrders);
+router.get("/:id", verifyToken, getOrderDetails);
 
 // Admin routes
-router.get("/admin/all", getAllOrders);
-router.put("/admin/:id/status", updateOrderStatus);
+router.get("/admin/all", verifyToken, getAllOrders);
+router.put("/admin/:id/status", verifyToken, updateOrderStatus);
 
 export default router;

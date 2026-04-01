@@ -7,10 +7,11 @@ import {
   getUserAddresses,
   // createAdmin,
 } from "../controllers/userController.js";
+import { verifyToken } from "../../middleware/auth.js";
 
 router.post("/signup", signup);
 router.post("/signin", signin);
 // router.post("/create-admin", createAdmin);
-router.get("/addresses", getUserAddresses);
+router.get("/addresses",verifyToken, getUserAddresses);
 
 export default router;
