@@ -7,7 +7,7 @@ export const getAllProducts = async (_, res) => {
     const products = await Product.find({})
       .sort({ createdAt: -1 })
       .populate("categoryId"); // newest first
-    res.status(200).json({ products });
+    res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
