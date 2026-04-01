@@ -2,7 +2,8 @@ import Cart from "../models/Cart.js";
 export const mergeToCart = async (req, res) => {
   try {
     const { items } = req.body;
-    const userId = req.userId;
+    // Handle both authenticated and guest users
+    const userId = req.userId || "guest_user";
     if (!Array.isArray(items)) {
       return res.status(400).json({ message: "Items should be an array" });
     }
@@ -48,7 +49,8 @@ export const mergeToCart = async (req, res) => {
 
 export const addOneProductToCart = async (req, res) => {
   const { productId, quantity } = req.body;
-  const userId = req.userId;
+  // Handle both authenticated and guest users
+  const userId = req.userId || "guest_user";
   try {
     let cart = await Cart.findOne({ userId });
     if (cart) {
@@ -81,7 +83,8 @@ export const addOneProductToCart = async (req, res) => {
 export const UpdateQuantity = async (req, res) => {
   try {
     const { productId, action } = req.body;
-    const userId = req.userId;
+    // Handle both authenticated and guest users
+    const userId = req.userId || "guest_user";
 
     let cart = await Cart.findOne({ userId });
     if (!cart) return res.status(404).json({ message: "Cart not found" });
@@ -112,11 +115,10 @@ export const UpdateQuantity = async (req, res) => {
   }
 };
 
-// controllers/cartController.js
-
 export const getCart = async (req, res) => {
   try {
-    const userId = req.userId;
+    // Handle both authenticated and guest users
+    const userId = req.userId || "guest_user";
 
     // Find the cart and "populate" the product details
     const cart = await Cart.findOne({ userId }).populate({
