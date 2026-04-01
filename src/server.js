@@ -21,15 +21,19 @@ const PORT = process.env.PORT || 5001;
 // Security middleware
 app.use(rateLimiter);
 
-// CORS configuration - completely permissive for testing
+// CORS configuration - handle preflight requests properly
 app.use(
   cors({
     origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    optionsSuccessStatus: 200,
   }),
 );
+
+// Handle preflight requests explicitly
+app.options("*", cors());
 
 mongodbConn();
 
