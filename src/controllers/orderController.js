@@ -2,8 +2,9 @@ import Order from "../models/Order.js";
 
 export const createOrder = async (req, res) => {
   try {
-    // Create random user ID for each order
+    // Create random user ID for guest orders
     const randomUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const userId = req.userId || randomUserId;
     const { shippingAddress, items } = req.body;
     console.log("Order data:", { shippingAddress, items });
 
@@ -34,7 +35,7 @@ export const createOrder = async (req, res) => {
 
     // Create order
     const order = new Order({
-      userId: randomUserId,
+      userId: userId,
       items: orderItems,
       shippingAddress,
       totalAmount,
@@ -43,7 +44,7 @@ export const createOrder = async (req, res) => {
     const savedOrder = await order.save();
     const populatedOrder = await savedOrder.populate("items.productId");
 
-    console.log(" Order created successfully for user:", randomUserId);
+    console.log(" Order created successfully for user:", userId);
 
     res.status(201).json(populatedOrder);
   } catch (error) {
@@ -57,19 +58,30 @@ export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find({})
       .sort({ createdAt: -1 })
+      .populate("userId", "name email role") // Get admin user details
       .populate("items.productId", "name url price"); // Get product details
 
-    // Enhance orders with user information from shipping address for guest users
+    // Enhance orders with user information
     const enhancedOrders = orders.map((order) => {
       const orderObj = order.toObject();
 
-      // All users are now guest users with info from shipping address
-      orderObj.userInfo = {
-        name: order.shippingAddress.name,
-        phone: order.shippingAddress.phoneNumber,
-        email: "guest@example.com",
-        isGuest: true,
-      };
+      if (order.userId && order.userId.ref) {
+        // Admin user order - populate from User model
+        orderObj.userInfo = {
+          name: order.userId.name,
+          email: order.userId.email,
+          role: order.userId.role,
+          isGuest: false,
+        };
+      } else {
+        // Guest user order - use shipping address info
+        orderObj.userInfo = {
+          name: order.shippingAddress.name,
+          phone: order.shippingAddress.phoneNumber,
+          email: "guest@example.com",
+          isGuest: true,
+        };
+      }
 
       return orderObj;
     });

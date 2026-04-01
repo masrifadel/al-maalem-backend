@@ -2,6 +2,7 @@ import express from "express";
 import productsRoutes from "./routes/productsRoutes.js";
 import ordersRoutes from "./routes/ordersRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
+import usersRoutes from "./routes/usersRoutes.js";
 import placeholderImageRoutes from "./routes/placeholderImageRoutes.js";
 import rateLimiter from "./middleware/rateLimiter.js";
 import errorHandler from "./middleware/errorHandler.js";
@@ -150,6 +151,7 @@ if (process.env.NODE_ENV !== "production") {
 
 // API routes
 app.use("/api/checkout", ordersRoutes);
+app.use("/api/user", usersRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/category", categoryRoutes);
 

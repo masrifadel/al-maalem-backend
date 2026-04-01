@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
   userId: {
-    type: String, // Changed from ObjectId to String for guest user IDs
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User", // Reference User model for admin orders
     required: true,
   },
   items: [
