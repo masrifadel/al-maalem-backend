@@ -9,62 +9,54 @@ export const createOrder = async (req, res) => {
     console.log("shippingAddress", shippingAddress);
     console.log("items", items);
 
-    // Handle both cases: with items (guest checkout) and without items (user logged in)
-    if (items && items.length > 0) {
-      // Guest checkout with items
-      let totalAmount = 0;
-      const orderItems = items.map((item) => ({
-        productId: item._id,
-        quantity: item.quantity,
-        priceAtPurchase: item.price,
-      }));
-
-      const order = new Order({
-        userId,
-        items: orderItems,
-        shippingAddress,
-        totalAmount: orderItems.reduce((sum, item) => sum + item.priceAtPurchase * item.quantity, 0),
-      status: "Pending",
+    // Find the cart and "populate" the product details
+    let cart = await Cart.findOne({ userId }).populate({
+      path: "items.product",
+      select: "name price url description", // Only fetch what's UI needs
     });
 
-    const savedOrder = await newOrder.save();
-
-    // Clear the cart only AFTER the order is successfully saved
-    await Cart.findOneAndDelete({ userId });
-
-    // Signal to admin panel that a new order was created using WebSocket
-    const wss = req.app.get("wss");
-    if (wss) {
-      const orderData = {
-        orderId: savedOrder._id,
-        customerName: shippingAddress.saveAddress
-          ? `${shippingAddress.building}, Floor ${shippingAddress.floor}`
-          : "Customer",
-        totalAmount,
-        status: "Pending",
-        createdAt: new Date(),
-      };
-
-      broadcastOrderUpdate(orderData);
-    } else {
-      // Fallback to localStorage if WebSocket is not available
-      localStorage.setItem("orders-updated", Date.now().toString());
+    if (!cart || cart.items.length === 0) {
+      return res.status(404).json({ message: "Cart not found or empty" });
     }
 
-    // Also trigger admin panel to refresh orders
-    setTimeout(() => {
-      localStorage.setItem("orders-updated", Date.now().toString());
-    }, 100);
+    let totalAmount = 0;
+    const orderItems = [];
 
-    res.status(201).json({
-      message: "Order placed successfully",
-      order: savedOrder,
+    // SAFETY CHECK: Ensure that product actually exists after populate
+    for (const item of cart.items) {
+      if (item.product) {
+        orderItems.push({
+          product: item.product._id,
+          quantity: item.quantity,
+          price: item.product.price,
+        });
+        totalAmount += item.product.price * item.quantity;
+      }
+    }
+
+    if (orderItems.length === 0) {
+      return res.status(404).json({ message: "No valid items in cart" });
+    }
+
+    // Create the order
+    const order = new Order({
+      user: userId,
+      items: orderItems,
+      shippingAddress,
+      totalAmount,
     });
+
+    const savedOrder = await order.save();
+    const populatedOrder = await savedOrder.populate("items.product");
+
+    // Clear the cart after successful order
+    await Cart.findOneAndUpdate({ userId }, { $unset: { items: 1 } });
+
+    res.status(201).json(populatedOrder);
   } catch (error) {
-    // Corrected string concatenation
     res
       .status(500)
-      .json({ message: "Internal server error: " + error.message });
+      .json({ message: "Error creating order", error: error.message });
   }
 };
 
