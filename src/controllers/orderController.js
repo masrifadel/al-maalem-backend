@@ -53,7 +53,7 @@ export const createOrder = async (req, res) => {
     });
 
     const savedOrder = await order.save();
-    const populatedOrder = await savedOrder.populate("items.product");
+    const populatedOrder = await savedOrder.populate("items.productId");
 
     // Clear the cart after successful order
     await Cart.findOneAndUpdate({ userId }, { $unset: { items: 1 } });
