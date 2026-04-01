@@ -1,58 +1,37 @@
 import Order from "../models/Order.js";
-import Cart from "../models/Cart.js";
 import User from "../models/User.js";
 
 export const createOrder = async (req, res) => {
   try {
-    // Remove authentication requirement - get userId from request or create guest user
-    const userId = req.userId || "guest_user";
-    const { shippingAddress } = req.body; // Remove items from destructuring
-    console.log("shippingAddress", shippingAddress);
+    // Create random user ID for each order
+    const randomUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const userId = req.userId || randomUserId;
+    const { shippingAddress, items } = req.body;
+    console.log("Order data:", { shippingAddress, items });
 
-    // For guest users, create/find cart by session or use a temporary cart
-    let cart;
-    if (userId === "guest_user") {
-      // For guest users, we'll use a session-based cart or create temporary one
-      cart = await Cart.findOne({}).populate({
-        path: "items.product",
-        select: "name price url description",
-      });
-    } else {
-      // For authenticated users, use their cart
-      cart = await Cart.findOne({ userId }).populate({
-        path: "items.product",
-        select: "name price url description",
-      });
-    }
-
-    console.log("Cart items:", cart.items);
-
-    if (!cart || cart.items.length === 0) {
-      return res.status(404).json({ message: "Cart not found or empty" });
+    // Validate items array
+    if (!Array.isArray(items) || items.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Items should be a non-empty array" });
     }
 
     let totalAmount = 0;
     const orderItems = [];
 
-    // SAFETY CHECK: Ensure that product actually exists after populate
-    console.log("Cart items:", cart.items);
-    for (const item of cart.items) {
-      console.log("Processing cart item:", item);
-      if (item.product) {
-        console.log("Product found:", item.product);
-        orderItems.push({
-          productId: item.product._id,
-          quantity: item.quantity,
-          priceAtPurchase: item.product.price,
-        });
-        totalAmount += item.product.price * item.quantity;
-      } else {
-        console.log("Product not found for item:", item);
-      }
+    // Process items directly from request (no cart needed)
+    for (const item of items) {
+      console.log("Processing order item:", item);
+      orderItems.push({
+        productId: item._id || item.productId,
+        quantity: item.quantity,
+        priceAtPurchase: item.price,
+      });
+      totalAmount += item.price * item.quantity;
     }
 
     if (orderItems.length === 0) {
-      return res.status(404).json({ message: "No valid items in cart" });
+      return res.status(400).json({ message: "No valid items in order" });
     }
 
     // Create the order
@@ -66,8 +45,8 @@ export const createOrder = async (req, res) => {
     const savedOrder = await order.save();
     const populatedOrder = await savedOrder.populate("items.productId");
 
-    // Clear the cart after successful order
-    await Cart.findOneAndUpdate({ userId }, { $unset: { items: 1 } });
+    // No cart clearing needed since we're not using cart anymore
+    console.log("✅ Order created successfully for user:", userId);
 
     res.status(201).json(populatedOrder);
   } catch (error) {
@@ -97,10 +76,33 @@ export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find({})
       .sort({ createdAt: -1 })
-      .populate("userId", "name email") // Get user details
       .populate("items.productId", "name url price"); // Get product details
 
-    res.status(200).json(orders);
+    // Enhance orders with user information from shipping address for guest users
+    const enhancedOrders = orders.map((order) => {
+      const orderObj = order.toObject();
+
+      // If userId starts with 'user_', it's a guest user
+      if (order.userId && order.userId.startsWith("user_")) {
+        orderObj.userInfo = {
+          name: order.shippingAddress.name,
+          phone: order.shippingAddress.phoneNumber,
+          email: "guest@example.com",
+          isGuest: true,
+        };
+      } else {
+        // For authenticated users, populate user details
+        orderObj.userInfo = {
+          name: "Admin User",
+          email: "admin@example.com",
+          isGuest: false,
+        };
+      }
+
+      return orderObj;
+    });
+
+    res.status(200).json(enhancedOrders);
   } catch (error) {
     res
       .status(500)
