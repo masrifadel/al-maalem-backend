@@ -24,13 +24,31 @@ app.use(rateLimiter);
 // CORS configuration - handle preflight requests properly
 app.use(
   cors({
-    origin: "*",
+    origin: [
+      "https://e-commerce-almaalem-frontend-o2i9.vercel.app",
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "*",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     optionsSuccessStatus: 200,
+    preflightContinue: true,
   }),
 );
+
+// Handle preflight requests explicitly
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With",
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.status(200).end();
+});
 
 mongodbConn();
 
