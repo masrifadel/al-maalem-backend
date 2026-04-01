@@ -1,21 +1,17 @@
 import express from "express";
-import { verifyToken } from "../../middleware/auth.js";
 import {
   createOrder,
-  getOrderDetails,
-  getUserOrders,
   getAllOrders,
   updateOrderStatus,
 } from "../controllers/orderController.js";
+import { verifyToken } from "../../middleware/auth.js";
 
 const router = express.Router();
 
-// User routes
-router.post("/", createOrder); // Remove verifyToken middleware
-router.get("/", verifyToken, getUserOrders);
-router.get("/:id", verifyToken, getOrderDetails);
+// Public routes - no authentication needed
+router.post("/", createOrder);
 
-// Admin routes
+// Admin routes - authentication required
 router.get("/admin/all", verifyToken, getAllOrders);
 router.put("/admin/:id/status", verifyToken, updateOrderStatus);
 
