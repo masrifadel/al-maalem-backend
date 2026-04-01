@@ -11,7 +11,7 @@ import {
 const router = express.Router();
 
 // User routes
-router.post("/", verifyToken, createOrder);
+router.post("/", createOrder); // Remove verifyToken middleware
 router.get("/", verifyToken, getUserOrders);
 router.get("/:id", verifyToken, getOrderDetails);
 

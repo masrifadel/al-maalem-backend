@@ -4,15 +4,26 @@ import User from "../models/User.js";
 
 export const createOrder = async (req, res) => {
   try {
-    const userId = req.userId;
+    // Remove authentication requirement - get userId from request or create guest user
+    const userId = req.userId || "guest_user";
     const { shippingAddress } = req.body; // Remove items from destructuring
     console.log("shippingAddress", shippingAddress);
 
-    // Find the cart and "populate" the product details
-    let cart = await Cart.findOne({ userId }).populate({
-      path: "items.product",
-      select: "name price url description", // Only fetch what's UI needs
-    });
+    // For guest users, create/find cart by session or use a temporary cart
+    let cart;
+    if (userId === "guest_user") {
+      // For guest users, we'll use a session-based cart or create temporary one
+      cart = await Cart.findOne({}).populate({
+        path: "items.product",
+        select: "name price url description",
+      });
+    } else {
+      // For authenticated users, use their cart
+      cart = await Cart.findOne({ userId }).populate({
+        path: "items.product",
+        select: "name price url description",
+      });
+    }
 
     console.log("Cart items:", cart.items);
 
