@@ -23,14 +23,19 @@ export const createOrder = async (req, res) => {
     const orderItems = [];
 
     // SAFETY CHECK: Ensure that product actually exists after populate
+    console.log("Cart items:", cart.items);
     for (const item of cart.items) {
+      console.log("Processing cart item:", item);
       if (item.product) {
+        console.log("Product found:", item.product);
         orderItems.push({
           productId: item.product._id,
           quantity: item.quantity,
           priceAtPurchase: item.product.price,
         });
         totalAmount += item.product.price * item.quantity;
+      } else {
+        console.log("Product not found for item:", item);
       }
     }
 
