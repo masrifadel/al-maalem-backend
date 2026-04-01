@@ -4,6 +4,7 @@ import ordersRoutes from "./routes/ordersRoutes.js";
 import usersRoutes from "./routes/usersRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import placeholderImageRoutes from "./routes/placeholderImageRoutes.js";
 import rateLimiter from "./middleware/rateLimiter.js";
 import errorHandler from "./middleware/errorHandler.js";
 import path from "path";
@@ -174,6 +175,19 @@ app.use("/api/user", usersRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/category", categoryRoutes);
 app.use("/api/cart", cartRoutes);
+
+// Static files - Use the uploads folder in the root directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Use the uploads folder in the root directory (backend/uploads)
+const uploadsPath = path.join(__dirname, "..", "uploads");
+
+console.log("Using uploads path:", uploadsPath);
+app.use("/uploads", express.static(uploadsPath));
+
+// Fallback placeholder images for missing uploads
+app.use("/uploads", placeholderImageRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {
