@@ -115,27 +115,12 @@ setTimeout(async () => {
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Static files - Multiple path attempts for uploads folder
+// Static files - Use the uploads folder in the root directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Try different possible paths for uploads folder
-const uploadsPath1 = path.join(__dirname, "..", "uploads");
-const uploadsPath2 = path.join(__dirname, "..", "..", "uploads");
-const uploadsPath3 = path.join(__dirname, "uploads");
-
-// Use the first path that exists
-const fs = await import("fs");
-let uploadsPath = uploadsPath3; // default
-try {
-  if (fs.existsSync(uploadsPath1)) {
-    uploadsPath = uploadsPath1;
-  } else if (fs.existsSync(uploadsPath2)) {
-    uploadsPath = uploadsPath2;
-  }
-} catch (error) {
-  console.log("Could not check uploads paths:", error);
-}
+// Use the uploads folder in the root directory (backend/uploads)
+const uploadsPath = path.join(__dirname, "..", "uploads");
 
 console.log("Using uploads path:", uploadsPath);
 app.use("/uploads", express.static(uploadsPath));
