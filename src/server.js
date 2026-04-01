@@ -21,34 +21,48 @@ const PORT = process.env.PORT || 5001;
 // Security middleware
 app.use(rateLimiter);
 
-// CORS configuration - handle preflight requests properly
+// CORS configuration - comprehensive fix
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+    return;
+  }
+
+  next();
+});
+
 app.use(
   cors({
     origin: [
       "https://e-commerce-almaalem-frontend-o2i9.vercel.app",
       "http://localhost:3000",
       "http://localhost:3001",
+      "https://maalem-backend-ybme.onrender.com",
       "*",
     ],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Origin",
+    ],
     optionsSuccessStatus: 200,
     preflightContinue: true,
   }),
 );
-
-// Handle preflight requests explicitly
-app.options("*", (req, res) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, X-Requested-With",
-  );
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.status(200).end();
-});
 
 mongodbConn();
 
