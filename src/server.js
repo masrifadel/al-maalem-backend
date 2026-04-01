@@ -177,9 +177,6 @@ app.use("/api/category", categoryRoutes);
 app.use("/api/cart", cartRoutes);
 
 // Static files - Use the uploads folder in the root directory
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 // Use the uploads folder in the root directory (backend/uploads)
 const uploadsPath = path.join(__dirname, "..", "uploads");
 
