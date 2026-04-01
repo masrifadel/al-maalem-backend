@@ -5,15 +5,16 @@ import User from "../models/User.js";
 export const createOrder = async (req, res) => {
   try {
     const userId = req.userId;
-    const { shippingAddress, items } = req.body;
+    const { shippingAddress } = req.body; // Remove items from destructuring
     console.log("shippingAddress", shippingAddress);
-    console.log("items", items);
 
     // Find the cart and "populate" the product details
     let cart = await Cart.findOne({ userId }).populate({
       path: "items.product",
       select: "name price url description", // Only fetch what's UI needs
     });
+
+    console.log("Cart items:", cart.items);
 
     if (!cart || cart.items.length === 0) {
       return res.status(404).json({ message: "Cart not found or empty" });
