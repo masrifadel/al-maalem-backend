@@ -2,8 +2,7 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    type: String, // Changed from ObjectId to String for guest user IDs
     required: true,
   },
   items: [
@@ -26,6 +25,10 @@ const orderSchema = new mongoose.Schema({
     required: true,
   },
   shippingAddress: {
+    name: {
+      type: String,
+      required: true,
+    },
     governorate: {
       type: String,
       enum: ["Beirut", "Mount Lebanon"],
