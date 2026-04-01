@@ -32,8 +32,13 @@ app.use(
   }),
 );
 
-// Handle preflight requests explicitly
-app.options("/api/*", cors());
+// Handle preflight requests explicitly for each route
+app.options("/api/user/signup", cors());
+app.options("/api/user/signin", cors());
+app.options("/api/category", cors());
+app.options("/api/products", cors());
+app.options("/api/cart", cors());
+app.options("/api/checkout", cors());
 
 mongodbConn();
 
