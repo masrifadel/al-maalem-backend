@@ -19,49 +19,13 @@ dotenv.config({ quiet: true });
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Security middleware
-app.use(rateLimiter);
-
-// Aggressive CORS middleware - ensure all routes get headers
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS, PATCH",
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
-  );
-  res.header("Access-Control-Allow-Credentials", "true");
-
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS, PATCH",
-    );
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept, Authorization",
-    );
-    res.header("Access-Control-Allow-Credentials", "true");
-    res.sendStatus(200);
-    return;
-  }
-
-  next();
-});
-
-// CORS configuration - comprehensive fix
+// 1. ALWAYS PUT CORS FIRST
 app.use(
   cors({
     origin: [
       "https://e-commerce-almaalem-frontend-o2i9.vercel.app",
       "http://localhost:3000",
       "http://localhost:3001",
-      "https://maalem-backend-ybme.onrender.com",
-      "*",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -70,11 +34,18 @@ app.use(
       "Authorization",
       "X-Requested-With",
       "Origin",
+      "Accept",
     ],
     optionsSuccessStatus: 200,
-    preflightContinue: false,
   }),
 );
+
+// 2. Security/Rate Limiting SECOND
+app.use(rateLimiter);
+
+// 3. Body Parsing THIRD
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 mongodbConn();
 
@@ -154,10 +125,6 @@ setTimeout(async () => {
     console.error("❌ Error seeding database:", error);
   }
 }, 2000);
-
-// Body parsing middleware
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Static files - Use the uploads folder in the root directory
 const __filename = fileURLToPath(import.meta.url);
