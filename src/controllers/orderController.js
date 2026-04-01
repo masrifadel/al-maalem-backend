@@ -26,9 +26,9 @@ export const createOrder = async (req, res) => {
     for (const item of cart.items) {
       if (item.product) {
         orderItems.push({
-          product: item.product._id,
+          productId: item.product._id,
           quantity: item.quantity,
-          price: item.product.price,
+          priceAtPurchase: item.product.price,
         });
         totalAmount += item.product.price * item.quantity;
       }
@@ -40,7 +40,7 @@ export const createOrder = async (req, res) => {
 
     // Create the order
     const order = new Order({
-      user: userId,
+      userId: userId,
       items: orderItems,
       shippingAddress,
       totalAmount,
