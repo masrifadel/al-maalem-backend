@@ -33,7 +33,7 @@ app.use(
 );
 
 // Handle preflight requests explicitly
-app.options("*", cors());
+app.options("/api/*", cors());
 
 mongodbConn();
 
