@@ -22,9 +22,8 @@ const PORT = process.env.PORT || 5001;
 // Security middleware
 app.use(rateLimiter);
 
-// CORS configuration - comprehensive fix
+// Aggressive CORS middleware - ensure all routes get headers
 app.use((req, res, next) => {
-  // Set CORS headers for all requests
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Methods",
@@ -36,7 +35,6 @@ app.use((req, res, next) => {
   );
   res.header("Access-Control-Allow-Credentials", "true");
 
-  // Handle preflight requests
   if (req.method === "OPTIONS") {
     res.header("Access-Control-Allow-Origin", "*");
     res.header(
@@ -55,6 +53,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// CORS configuration - comprehensive fix
 app.use(
   cors({
     origin: [
