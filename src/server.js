@@ -40,12 +40,12 @@ app.use(
   }),
 );
 
-// 2. Security/Rate Limiting SECOND
-app.use(rateLimiter);
-
-// 3. Body Parsing THIRD
+// 2. Body Parsing SECOND
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// 3. Security/Rate Limiting LAST (re-enabled with improved config)
+app.use(rateLimiter);
 
 mongodbConn();
 
