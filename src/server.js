@@ -19,7 +19,10 @@ dotenv.config({ quiet: true });
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// 1. ALWAYS PUT CORS FIRST
+// Add trust proxy for proper IP detection
+app.set("trust proxy", 1);
+
+// 1. CORS FIRST - before rate limiter
 app.use(
   cors({
     origin: [
@@ -44,8 +47,8 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// 3. Security/Rate Limiting LAST (re-enabled with improved config)
-app.use(rateLimiter);
+// 3. Rate Limiter LAST - scoped to /api only
+app.use("/api", rateLimiter);
 
 mongodbConn();
 
