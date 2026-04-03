@@ -33,16 +33,18 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: "No valid items in order" });
     }
 
-    // Create order
+    // Create order - skip ObjectId validation for guest users
     const order = new Order({
-      userId: userId,
+      userId: userId, // Keep as string for guest orders
       items: orderItems,
       shippingAddress,
       totalAmount,
     });
 
     const savedOrder = await order.save();
-    const populatedOrder = await savedOrder.populate("items.productId");
+    const populatedOrder = await Order.findById(savedOrder._id)
+      .populate("items.productId")
+      .lean(); // Convert to plain JS object
 
     console.log(" Order created successfully for user:", userId);
 
