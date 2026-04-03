@@ -65,7 +65,12 @@ export const getAllOrders = async (req, res) => {
     const enhancedOrders = orders.map((order) => {
       const orderObj = order.toObject();
 
-      if (order.userId && order.userId.ref) {
+      // Check if userId is a valid MongoDB ObjectId (admin order) or string (guest order)
+      if (
+        order.userId &&
+        typeof order.userId === "object" &&
+        order.userId._id
+      ) {
         // Admin user order - populate from User model
         orderObj.userInfo = {
           name: order.userId.name,
