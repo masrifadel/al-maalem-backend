@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.Mixed, // Allow both ObjectId (admin) and string (guest)
     ref: "User", // Reference User model for admin orders
-    required: true,
+    required: false, // Make optional for guest orders
   },
   items: [
     {
