@@ -101,6 +101,47 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
+export const getOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await Order.findById(id)
+      .populate("items.productId", "name url price")
+      .lean();
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Enhance order with user information
+    const enhancedOrder = { ...order };
+
+    if (order.userId && typeof order.userId === "object" && order.userId._id) {
+      // Admin user order - populate from User model
+      enhancedOrder.userInfo = {
+        name: order.userId.name,
+        email: order.userId.email,
+        role: order.userId.role,
+        isGuest: false,
+      };
+    } else {
+      // Guest user order - use shipping address info
+      enhancedOrder.userInfo = {
+        name: order.shippingAddress.name,
+        phone: order.shippingAddress.phoneNumber,
+        email: "guest@example.com",
+        isGuest: true,
+      };
+    }
+
+    res.status(200).json(enhancedOrder);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching order", error: error.message });
+  }
+};
+
 export const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
