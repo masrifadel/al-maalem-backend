@@ -2,14 +2,22 @@ import Order from "../models/Order.js";
 
 export const createOrder = async (req, res) => {
   try {
+    console.log("🛒 ORDER CREATION STARTED");
+    console.log("📥 Request body:", req.body);
+    console.log("📥 Request headers:", req.headers);
+
     // Create random user ID for guest orders
     const randomUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const userId = req.userId || randomUserId;
     const { shippingAddress, items } = req.body;
-    console.log("Order data:", { shippingAddress, items });
+
+    console.log("👤 User ID being used:", userId);
+    console.log("📦 Shipping address:", shippingAddress);
+    console.log("🛒 Items count:", items?.length || 0);
 
     // Validate items array
     if (!Array.isArray(items) || items.length === 0) {
+      console.log("❌ Invalid items array");
       return res
         .status(400)
         .json({ message: "Items should be a non-empty array" });
@@ -20,7 +28,7 @@ export const createOrder = async (req, res) => {
 
     // Process items directly from request (no cart needed)
     for (const item of items) {
-      console.log("Processing order item:", item);
+      console.log("📦 Processing item:", item);
       orderItems.push({
         productId: item._id || item.productId,
         quantity: item.quantity,
@@ -30,8 +38,12 @@ export const createOrder = async (req, res) => {
     }
 
     if (orderItems.length === 0) {
+      console.log("❌ No valid items in order");
       return res.status(400).json({ message: "No valid items in order" });
     }
+
+    console.log("💰 Total amount calculated:", totalAmount);
+    console.log("🛒 Order items prepared:", orderItems.length);
 
     // Create order - skip ObjectId validation for guest users
     const order = new Order({
@@ -41,15 +53,27 @@ export const createOrder = async (req, res) => {
       totalAmount,
     });
 
+    console.log("📋 Order object created:", order);
+
     const savedOrder = await order.save();
+    console.log("💾 Order saved to database:", savedOrder._id);
+
     const populatedOrder = await Order.findById(savedOrder._id)
       .populate("items.productId")
       .lean(); // Convert to plain JS object
 
-    console.log(" Order created successfully for user:", userId);
+    console.log("🔍 Order populated:", populatedOrder);
+    console.log("🎯 Final order data:", {
+      _id: populatedOrder._id,
+      userId: populatedOrder.userId,
+      itemsCount: populatedOrder.items?.length || 0,
+      totalAmount: populatedOrder.totalAmount,
+    });
 
     res.status(201).json(populatedOrder);
+    console.log("✅ Order response sent with _id:", populatedOrder._id);
   } catch (error) {
+    console.error("❌ Order creation error:", error);
     res
       .status(500)
       .json({ message: "Error creating order", error: error.message });
