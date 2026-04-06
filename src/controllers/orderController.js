@@ -58,10 +58,14 @@ export const createOrder = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   try {
+    console.log("🔍 Fetching ALL orders from database...");
+
     const orders = await Order.find({})
       .sort({ createdAt: -1 })
       .populate("userId", "name email role") // Get admin user details
       .populate("items.productId", "name url price"); // Get product details
+
+    console.log(`📊 Found ${orders.length} orders in database`);
 
     // Enhance orders with user information
     const enhancedOrders = orders.map((order) => {
