@@ -80,6 +80,14 @@ export const getAllOrders = async (req, res) => {
           role: order.userId.role,
           isGuest: false,
         };
+      } else if (order.userId === "admin_user") {
+        // Admin token order - use admin user info
+        orderObj.userInfo = {
+          name: "Admin User",
+          email: "maalem@example.com",
+          role: "admin",
+          isGuest: false,
+        };
       } else {
         // Guest user order - use shipping address info
         orderObj.userInfo = {
