@@ -6,6 +6,22 @@ import fs from "fs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// IMMEDIATE: Create uploads directory at module load
+const uploadsPath = path.join(process.cwd(), "uploads");
+console.log("=== MODULE INIT ===");
+console.log("Creating uploads directory immediately:", uploadsPath);
+
+try {
+  if (!fs.existsSync(uploadsPath)) {
+    fs.mkdirSync(uploadsPath, { recursive: true });
+    console.log("✅ Uploads directory created at module load");
+  } else {
+    console.log("✅ Uploads directory already exists at module load");
+  }
+} catch (error) {
+  console.error("❌ Failed to create uploads directory at module load:", error);
+}
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // Use the most reliable path resolution
