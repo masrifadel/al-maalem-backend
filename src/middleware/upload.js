@@ -18,16 +18,37 @@ const storage = multer.diskStorage({
     console.log("uploadsPath resolved:", path.resolve(uploadsPath));
 
     // Create uploads directory if it doesn't exist
-    if (!fs.existsSync(uploadsPath)) {
-      console.log("Creating uploads directory:", uploadsPath);
-      try {
+    console.log("Checking if directory exists:", uploadsPath);
+    console.log("Directory exists check:", fs.existsSync(uploadsPath));
+
+    try {
+      if (!fs.existsSync(uploadsPath)) {
+        console.log("Creating uploads directory:", uploadsPath);
         fs.mkdirSync(uploadsPath, { recursive: true });
         console.log("✅ Uploads directory created successfully");
-      } catch (error) {
-        console.error("❌ Failed to create uploads directory:", error);
+      } else {
+        console.log("✅ Uploads directory already exists");
+
+        // Verify directory is accessible
+        try {
+          fs.accessSync(uploadsPath, fs.constants.W_OK);
+          console.log("✅ Uploads directory is accessible");
+        } catch (accessError) {
+          console.error("❌ Uploads directory not accessible:", accessError);
+          // Try to create anyway
+          fs.mkdirSync(uploadsPath, { recursive: true });
+          console.log("✅ Force created uploads directory");
+        }
       }
-    } else {
-      console.log("✅ Uploads directory already exists");
+    } catch (error) {
+      console.error("❌ Error with directory operations:", error);
+      // Try to create as fallback
+      try {
+        fs.mkdirSync(uploadsPath, { recursive: true });
+        console.log("✅ Fallback: Created uploads directory");
+      } catch (fallbackError) {
+        console.error("❌ Fallback failed:", fallbackError);
+      }
     }
 
     // Verify directory exists and is writable
