@@ -129,7 +129,10 @@ export const getAllOrders = async (req, res) => {
       return orderObj;
     });
 
+    console.log(`✅ Enhanced ${enhancedOrders.length} orders with user info`);
+    console.log("📤 Sending response with data:", enhancedOrders);
     res.status(200).json(enhancedOrders);
+    console.log("📤 Response sent successfully");
   } catch (error) {
     res
       .status(500)
