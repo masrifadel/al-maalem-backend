@@ -1,6 +1,7 @@
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,7 +18,6 @@ const storage = multer.diskStorage({
     console.log("uploadsPath resolved:", path.resolve(uploadsPath));
 
     // Create uploads directory if it doesn't exist
-    const fs = require("fs");
     if (!fs.existsSync(uploadsPath)) {
       console.log("Creating uploads directory:", uploadsPath);
       try {

@@ -8,6 +8,7 @@ import rateLimiter from "./middleware/rateLimiter.js";
 import errorHandler from "./middleware/errorHandler.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 import mongodbConn from "./config/db.js";
 import dotenv from "dotenv";
@@ -147,10 +148,10 @@ const __dirname = path.dirname(__filename);
 const uploadsPath = path.resolve(process.cwd(), "src", "uploads");
 
 // Create uploads directory if it doesn't exist
-const fs = require("fs");
-if (!fs.existsSync(uploadsPath)) {
+import { existsSync, mkdirSync } from "fs";
+if (!existsSync(uploadsPath)) {
   console.log("Creating uploads directory at startup:", uploadsPath);
-  fs.mkdirSync(uploadsPath, { recursive: true });
+  mkdirSync(uploadsPath, { recursive: true });
   console.log("Uploads directory created successfully at startup");
 } else {
   console.log("Uploads directory exists at startup");
