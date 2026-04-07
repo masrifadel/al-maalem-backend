@@ -86,8 +86,8 @@ export const getAllOrders = async (req, res) => {
 
     const orders = await Order.find({})
       .sort({ createdAt: -1 })
-      .populate("userId", "name email role") // Get admin user details
       .populate("items.productId", "name url price"); // Get product details
+    // Note: Don't populate userId here - handle it manually in the mapping
 
     console.log(`📊 Found ${orders.length} orders in database`);
 
