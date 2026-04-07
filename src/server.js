@@ -139,12 +139,12 @@ setTimeout(async () => {
   }
 }, 2000);
 
-// Static files - Use absolute uploads path
+// Static files - Use absolute uploads path that matches upload middleware
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Use absolute path to uploads folder
-const uploadsPath = path.resolve(process.cwd(), "uploads");
+// Use the same path as upload middleware - include /src
+const uploadsPath = path.resolve(process.cwd(), "src", "uploads");
 
 // Create uploads directory if it doesn't exist
 const fs = require("fs");
@@ -176,13 +176,8 @@ app.use("/api/user", usersRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/category", categoryRoutes);
 
-// Static files - Use the uploads folder in the root directory
-// Use the uploads folder in the root directory (backend/uploads)
-console.log("Using uploads path:", uploadsPath);
-app.use("/uploads", express.static(uploadsPath));
-
 // Fallback placeholder images for missing uploads
-app.use("/uploads", placeholderImageRoutes);
+app.use(placeholderImageRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {
