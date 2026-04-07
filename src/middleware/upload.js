@@ -7,31 +7,41 @@ const __dirname = path.dirname(__filename);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Use multiple path resolution methods for robustness
-    const path1 = path.resolve(process.cwd(), "uploads");
-    const path2 = path.join(__dirname, "..", "..", "uploads");
-    const path3 = path.join(process.cwd(), "uploads");
+    // Use the most reliable path resolution
+    const uploadsPath = path.join(process.cwd(), "uploads");
 
-    console.log("Upload destination paths:");
-    console.log("  path1 (resolve):", path1);
-    console.log("  path2 (join):", path2);
-    console.log("  path3 (cwd+join):", path3);
-    console.log("  process.cwd():", process.cwd());
-    console.log("  __dirname:", __dirname);
-
-    // Use the first valid path and ensure directory exists
-    const uploadsPath = path1;
-    console.log("Final upload destination:", uploadsPath);
+    console.log("=== UPLOAD DEBUGGING ===");
+    console.log("process.cwd():", process.cwd());
+    console.log("__dirname:", __dirname);
+    console.log("uploadsPath:", uploadsPath);
+    console.log("uploadsPath resolved:", path.resolve(uploadsPath));
 
     // Create uploads directory if it doesn't exist
     const fs = require("fs");
     if (!fs.existsSync(uploadsPath)) {
       console.log("Creating uploads directory:", uploadsPath);
-      fs.mkdirSync(uploadsPath, { recursive: true });
-      console.log("Uploads directory created successfully");
+      try {
+        fs.mkdirSync(uploadsPath, { recursive: true });
+        console.log("✅ Uploads directory created successfully");
+      } catch (error) {
+        console.error("❌ Failed to create uploads directory:", error);
+      }
     } else {
-      console.log("Uploads directory already exists");
+      console.log("✅ Uploads directory already exists");
     }
+
+    // Verify directory exists and is writable
+    try {
+      const stats = fs.statSync(uploadsPath);
+      console.log("Directory stats:", stats);
+      console.log("Is directory:", stats.isDirectory());
+      console.log("Writable:", (stats.mode & parseInt("777", 8)) !== 0);
+    } catch (error) {
+      console.error("❌ Error checking directory:", error);
+    }
+
+    console.log("Final upload destination:", uploadsPath);
+    console.log("=== END UPLOAD DEBUGGING ===");
 
     cb(null, uploadsPath);
   },
@@ -54,20 +64,43 @@ const upload = multer({
 // Add file verification middleware
 export const verifyUpload = (req, res, next) => {
   if (req.file) {
-    const filePath = path.resolve(process.cwd(), "uploads", req.file.filename);
-    console.log("Verifying file exists at:", filePath);
+    const filePath = path.join(process.cwd(), "uploads", req.file.filename);
+    console.log("=== FILE VERIFICATION ===");
+    console.log("Expected file path:", filePath);
+    console.log("File filename:", req.file.filename);
+    console.log("File originalname:", req.file.originalname);
+    console.log("File size:", req.file.size, "bytes");
+    console.log("File mimetype:", req.file.mimetype);
 
     // Check if file actually exists
     const fs = require("fs");
     if (fs.existsSync(filePath)) {
-      console.log("File saved successfully:", req.file.filename);
-      console.log("File size:", req.file.size, "bytes");
+      const stats = fs.statSync(filePath);
+      console.log("✅ File saved successfully:", req.file.filename);
+      console.log("File size on disk:", stats.size, "bytes");
+      console.log("File created:", stats.birthtime);
+      console.log("File modified:", stats.mtime);
+
+      // List all files in uploads directory
+      try {
+        const files = fs.readdirSync(path.join(process.cwd(), "uploads"));
+        console.log("Files in uploads directory:", files);
+      } catch (error) {
+        console.error("Error listing uploads directory:", error);
+      }
+
       next();
     } else {
-      console.error("File not found after upload:", filePath);
+      console.error("❌ File not found after upload:", filePath);
+      console.error(
+        "Uploads directory contents:",
+        fs.readdirSync(path.join(process.cwd(), "uploads")),
+      );
       res.status(500).json({ error: "File upload failed - file not saved" });
     }
+    console.log("=== END FILE VERIFICATION ===");
   } else {
+    console.log("No file in request");
     next();
   }
 };
