@@ -144,8 +144,8 @@ setTimeout(async () => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Use the same path as upload middleware - include /src
-const uploadsPath = path.resolve(process.cwd(), "src", "uploads");
+// Use same path as upload middleware - NO /src
+const uploadsPath = path.resolve(process.cwd(), "uploads");
 
 // Create uploads directory if it doesn't exist
 import { existsSync, mkdirSync } from "fs";
