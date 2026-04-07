@@ -118,9 +118,16 @@ export const getAllOrders = async (req, res) => {
         };
       } else {
         // Guest user order - use shipping address info
+        console.log("🏠 Guest order shipping address:", order.shippingAddress);
+        console.log("🏠 Guest order name field:", order.shippingAddress?.name);
+        console.log(
+          "🏠 Guest order name type:",
+          typeof order.shippingAddress?.name,
+        );
+
         orderObj.userInfo = {
-          name: order.shippingAddress.name,
-          phone: order.shippingAddress.phoneNumber,
+          name: order.shippingAddress?.name || "Unknown Customer",
+          phone: order.shippingAddress?.phoneNumber || "Unknown Phone",
           email: "guest@example.com",
           isGuest: true,
         };

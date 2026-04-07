@@ -128,12 +128,12 @@ setTimeout(async () => {
   }
 }, 2000);
 
-// Static files - Use the uploads folder in the root directory
+// Static files - Use absolute uploads path
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Use the uploads folder in the root directory (backend/uploads)
-const uploadsPath = path.join(__dirname, "..", "uploads");
+// Use absolute path to uploads folder
+const uploadsPath = path.resolve(process.cwd(), "uploads");
 
 console.log("Using uploads path:", uploadsPath);
 app.use("/uploads", express.static(uploadsPath));
