@@ -19,9 +19,20 @@ const storage = multer.diskStorage({
     console.log("  process.cwd():", process.cwd());
     console.log("  __dirname:", __dirname);
 
-    // Use the first valid path
+    // Use the first valid path and ensure directory exists
     const uploadsPath = path1;
     console.log("Final upload destination:", uploadsPath);
+
+    // Create uploads directory if it doesn't exist
+    const fs = require("fs");
+    if (!fs.existsSync(uploadsPath)) {
+      console.log("Creating uploads directory:", uploadsPath);
+      fs.mkdirSync(uploadsPath, { recursive: true });
+      console.log("Uploads directory created successfully");
+    } else {
+      console.log("Uploads directory already exists");
+    }
+
     cb(null, uploadsPath);
   },
   filename: function (req, file, cb) {

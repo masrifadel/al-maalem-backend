@@ -135,6 +135,16 @@ const __dirname = path.dirname(__filename);
 // Use absolute path to uploads folder
 const uploadsPath = path.resolve(process.cwd(), "uploads");
 
+// Create uploads directory if it doesn't exist
+const fs = require("fs");
+if (!fs.existsSync(uploadsPath)) {
+  console.log("Creating uploads directory at startup:", uploadsPath);
+  fs.mkdirSync(uploadsPath, { recursive: true });
+  console.log("Uploads directory created successfully at startup");
+} else {
+  console.log("Uploads directory exists at startup");
+}
+
 console.log("Using uploads path:", uploadsPath);
 app.use("/uploads", express.static(uploadsPath));
 
