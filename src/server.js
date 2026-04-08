@@ -140,24 +140,22 @@ setTimeout(async () => {
   }
 }, 2000);
 
-// Static files - Use absolute uploads path that matches upload middleware
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Use same path as upload middleware - NO /src
+// Static files - Serve from backend ROOT uploads folder
 const uploadsPath = path.resolve(process.cwd(), "uploads");
 
-// Create uploads directory if it doesn't exist
-import { existsSync, mkdirSync } from "fs";
-if (!existsSync(uploadsPath)) {
-  console.log("Creating uploads directory at startup:", uploadsPath);
-  mkdirSync(uploadsPath, { recursive: true });
-  console.log("Uploads directory created successfully at startup");
+console.log("=== SERVER STATIC SETUP ===");
+console.log("Backend root:", process.cwd());
+console.log("Serving uploads from:", uploadsPath);
+
+// Ensure uploads directory exists
+if (!fs.existsSync(uploadsPath)) {
+  console.log("Creating uploads directory:", uploadsPath);
+  fs.mkdirSync(uploadsPath, { recursive: true });
+  console.log("Uploads directory created successfully");
 } else {
-  console.log("Uploads directory exists at startup");
+  console.log("Uploads directory exists");
 }
 
-console.log("Using uploads path:", uploadsPath);
 app.use("/uploads", express.static(uploadsPath));
 
 // Request logging (only in development)
