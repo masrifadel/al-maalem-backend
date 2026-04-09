@@ -82,14 +82,10 @@ export const createOrder = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   try {
-    console.log("🔍 Fetching ALL orders from database...");
-
     const orders = await Order.find({})
       .sort({ createdAt: -1 })
       .populate("items.productId", "name url price"); // Get product details
     // Note: Don't populate userId here - handle it manually in the mapping
-
-    console.log(`📊 Found ${orders.length} orders in database`);
 
     // Enhance orders with user information
     const enhancedOrders = orders.map((order) => {
@@ -118,13 +114,6 @@ export const getAllOrders = async (req, res) => {
         };
       } else {
         // Guest user order - use shipping address info
-        console.log("🏠 Guest order shipping address:", order.shippingAddress);
-        console.log("🏠 Guest order name field:", order.shippingAddress?.name);
-        console.log(
-          "🏠 Guest order name type:",
-          typeof order.shippingAddress?.name,
-        );
-
         orderObj.userInfo = {
           name: order.shippingAddress?.name || "Unknown Customer",
           phone: order.shippingAddress?.phoneNumber || "Unknown Phone",
@@ -136,10 +125,7 @@ export const getAllOrders = async (req, res) => {
       return orderObj;
     });
 
-    console.log(`✅ Enhanced ${enhancedOrders.length} orders with user info`);
-    console.log("📤 Sending response with data:", enhancedOrders);
     res.status(200).json(enhancedOrders);
-    console.log("📤 Response sent successfully");
   } catch (error) {
     res
       .status(500)
