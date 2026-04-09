@@ -142,10 +142,18 @@ console.log("Serving uploads from:", uploadsPath);
 // Ensure uploads directory exists
 if (!fs.existsSync(uploadsPath)) {
   console.log("Creating uploads directory:", uploadsPath);
-  fs.mkdirSync(uploadsPath, { recursive: true });
+  fs.mkdirSync(uploadsPath, { recursive: true, mode: 0o755 });
   console.log("Uploads directory created successfully");
 } else {
   console.log("Uploads directory exists");
+
+  // Ensure directory has proper permissions
+  try {
+    fs.chmodSync(uploadsPath, 0o755);
+    console.log("Uploads directory permissions updated");
+  } catch (error) {
+    console.error("Failed to update permissions:", error);
+  }
 }
 
 app.use("/uploads", express.static(uploadsPath));

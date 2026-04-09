@@ -12,10 +12,18 @@ console.log("Uploads path:", uploadsPath);
 // Create uploads directory at startup if it doesn't exist
 if (!fs.existsSync(uploadsPath)) {
   console.log("Creating uploads directory:", uploadsPath);
-  fs.mkdirSync(uploadsPath, { recursive: true });
+  fs.mkdirSync(uploadsPath, { recursive: true, mode: 0o755 });
   console.log("Uploads directory created successfully");
 } else {
   console.log("Uploads directory exists");
+
+  // Ensure directory has proper permissions
+  try {
+    fs.chmodSync(uploadsPath, 0o755);
+    console.log("Uploads directory permissions updated");
+  } catch (error) {
+    console.error("Failed to update permissions:", error);
+  }
 }
 
 const storage = multer.diskStorage({
