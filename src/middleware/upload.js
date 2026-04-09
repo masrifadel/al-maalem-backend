@@ -12,17 +12,25 @@ console.log("Uploads path:", uploadsPath);
 // Create uploads directory at startup if it doesn't exist
 if (!fs.existsSync(uploadsPath)) {
   console.log("Creating uploads directory:", uploadsPath);
-  fs.mkdirSync(uploadsPath, { recursive: true, mode: 0o755 });
+  fs.mkdirSync(uploadsPath, { recursive: true, mode: 0o777 });
   console.log("Uploads directory created successfully");
 } else {
   console.log("Uploads directory exists");
 
-  // Ensure directory has proper permissions
+  // Try multiple permission approaches
   try {
-    fs.chmodSync(uploadsPath, 0o755);
-    console.log("Uploads directory permissions updated");
+    fs.chmodSync(uploadsPath, 0o777);
+    console.log("Uploads directory permissions updated to 777");
   } catch (error) {
-    console.error("Failed to update permissions:", error);
+    console.error("Failed to update permissions to 777:", error);
+
+    // Try alternative approach
+    try {
+      fs.chmodSync(uploadsPath, 0o755);
+      console.log("Uploads directory permissions updated to 755");
+    } catch (error2) {
+      console.error("Failed to update permissions to 755:", error2);
+    }
   }
 }
 
