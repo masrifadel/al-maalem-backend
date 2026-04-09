@@ -1,6 +1,5 @@
 import Product from "../models/Product.js";
-import fs from "fs";
-import path from "path";
+import { bufferToDataUrl } from "../middleware/upload.js";
 
 export const getAllProducts = async (_, res) => {
   try {
@@ -51,7 +50,19 @@ export const addProduct = async (req, res) => {
     isFeatured,
     categoryId,
   } = req.body;
-  const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
+
+  // Handle memory storage - convert to base64
+  let imageUrl = "";
+  if (req.file) {
+    console.log("=== MEMORY UPLOAD PRODUCT ===");
+    console.log("File received:", req.file.originalname);
+    console.log("File size:", req.file.size);
+    console.log("Mimetype:", req.file.mimetype);
+
+    imageUrl = bufferToDataUrl(req.file.buffer, req.file.mimetype);
+    console.log("Converted to data URL, length:", imageUrl.length);
+    console.log("=== MEMORY UPLOAD PRODUCT COMPLETE ===");
+  }
 
   try {
     // Validate required fields
@@ -97,18 +108,18 @@ export const updateProduct = async (req, res) => {
     }
     let imageUrl = existingProduct.url;
 
+    // Handle memory storage - convert to base64
     if (req.file) {
-      // If a new file is uploaded, set the new path
-      imageUrl = `/uploads/${req.file.filename}`;
+      console.log("=== MEMORY UPLOAD PRODUCT UPDATE ===");
+      console.log("File received:", req.file.originalname);
+      console.log("File size:", req.file.size);
+      console.log("Mimetype:", req.file.mimetype);
 
-      // OPTIONAL: Delete the old physical file from the server to save space
-      if (existingProduct.url) {
-        const oldPath = path.join(process.cwd(), existingProduct.url);
-        if (fs.existsSync(oldPath)) {
-          fs.unlinkSync(oldPath);
-        }
-      }
+      imageUrl = bufferToDataUrl(req.file.buffer, req.file.mimetype);
+      console.log("Converted to data URL, length:", imageUrl.length);
+      console.log("=== MEMORY UPLOAD PRODUCT UPDATE COMPLETE ===");
     }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       Id,
       {

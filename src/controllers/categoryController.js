@@ -1,4 +1,5 @@
 import Category from "../models/Category.js";
+import { bufferToDataUrl } from "../middleware/upload.js";
 
 // GET ALL: Public (For Navbar/Sidebar)
 export const getAllCategories = async (req, res) => {
@@ -27,7 +28,20 @@ export const getCategory = async (req, res) => {
 // POST: Create new category (Admin Only)
 export const createCategory = async (req, res) => {
   const { name, path } = req.body;
-  const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
+
+  // Handle memory storage - convert to base64
+  let imageUrl = "";
+  if (req.file) {
+    console.log("=== MEMORY UPLOAD ===");
+    console.log("File received:", req.file.originalname);
+    console.log("File size:", req.file.size);
+    console.log("Mimetype:", req.file.mimetype);
+
+    imageUrl = bufferToDataUrl(req.file.buffer, req.file.mimetype);
+    console.log("Converted to data URL, length:", imageUrl.length);
+    console.log("=== MEMORY UPLOAD COMPLETE ===");
+  }
+
   try {
     const newCategory = new Category({ name, path, imageUrl });
     const savedCategory = await newCategory.save();
@@ -45,9 +59,16 @@ export const updateCategory = async (req, res) => {
       path: req.body.path,
     };
 
-    // Add image if a new one was uploaded
+    // Handle memory storage - convert to base64
     if (req.file) {
-      updateData.imageUrl = `/uploads/${req.file.filename}`;
+      console.log("=== MEMORY UPLOAD UPDATE ===");
+      console.log("File received:", req.file.originalname);
+      console.log("File size:", req.file.size);
+      console.log("Mimetype:", req.file.mimetype);
+
+      updateData.imageUrl = bufferToDataUrl(req.file.buffer, req.file.mimetype);
+      console.log("Converted to data URL, length:", updateData.imageUrl.length);
+      console.log("=== MEMORY UPLOAD UPDATE COMPLETE ===");
     }
 
     const updatedCategory = await Category.findByIdAndUpdate(

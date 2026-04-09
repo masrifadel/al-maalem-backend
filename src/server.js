@@ -132,39 +132,10 @@ setTimeout(async () => {
   }
 }, 2000);
 
-// Static files - Serve from backend ROOT uploads folder (go up from src to project root)
-const uploadsPath = path.resolve(process.cwd(), "..", "uploads");
-
-console.log("=== SERVER STATIC SETUP ===");
-console.log("Backend root:", process.cwd());
-console.log("Serving uploads from:", uploadsPath);
-
-// Ensure uploads directory exists
-if (!fs.existsSync(uploadsPath)) {
-  console.log("Creating uploads directory:", uploadsPath);
-  fs.mkdirSync(uploadsPath, { recursive: true, mode: 0o777 });
-  console.log("Uploads directory created successfully");
-} else {
-  console.log("Uploads directory exists");
-
-  // Try multiple permission approaches
-  try {
-    fs.chmodSync(uploadsPath, 0o777);
-    console.log("Uploads directory permissions updated to 777");
-  } catch (error) {
-    console.error("Failed to update permissions to 777:", error);
-
-    // Try alternative approach
-    try {
-      fs.chmodSync(uploadsPath, 0o755);
-      console.log("Uploads directory permissions updated to 755");
-    } catch (error2) {
-      console.error("Failed to update permissions to 755:", error2);
-    }
-  }
-}
-
-app.use("/uploads", express.static(uploadsPath));
+// Static files - No longer needed with memory storage
+console.log("=== MEMORY STORAGE ACTIVE ===");
+console.log("Images stored as base64 data URLs in database");
+console.log("No static file serving required");
 
 // Request logging (only in development)
 if (process.env.NODE_ENV !== "production") {
