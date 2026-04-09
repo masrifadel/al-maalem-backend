@@ -2,8 +2,8 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Save to backend ROOT uploads folder - permanent storage
-const uploadsPath = path.resolve(process.cwd(), "uploads");
+// Save to backend ROOT uploads folder - permanent storage (go up from src to project root)
+const uploadsPath = path.resolve(process.cwd(), "..", "uploads");
 
 console.log("=== ROOT UPLOAD SETUP ===");
 console.log("Backend root:", process.cwd());

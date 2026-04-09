@@ -132,8 +132,8 @@ setTimeout(async () => {
   }
 }, 2000);
 
-// Static files - Serve from backend ROOT uploads folder
-const uploadsPath = path.resolve(process.cwd(), "uploads");
+// Static files - Serve from backend ROOT uploads folder (go up from src to project root)
+const uploadsPath = path.resolve(process.cwd(), "..", "uploads");
 
 console.log("=== SERVER STATIC SETUP ===");
 console.log("Backend root:", process.cwd());
