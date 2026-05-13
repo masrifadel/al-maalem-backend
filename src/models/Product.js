@@ -25,6 +25,8 @@ const productSchema = new mongoose.Schema({
   url: {
     type: String,
     required: true,
+    comment:
+      "Base64 data URL for product image (e.g., data:image/jpeg;base64,...)",
   },
   categoryId: {
     type: Schema.Types.ObjectId,

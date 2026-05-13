@@ -10,7 +10,12 @@ const categorySchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  imageUrl: { type: String, required: true },
+  imageUrl: {
+    type: String,
+    required: true,
+    comment:
+      "Base64 data URL for category image (e.g., data:image/jpeg;base64,...)",
+  },
 });
 
 const Category = mongoose.model("Category", categorySchema); //create model based on "CategorySchema" model.
